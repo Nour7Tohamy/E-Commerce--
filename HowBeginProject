@@ -1,0 +1,71 @@
+?? E-Commerce API (Project Phase 1 – Setup & EF Core)
+------------------------------------------------------
+
+?? Mission 1 – Create the Project
+
+?? Open Visual Studio Community 
+?? Create ASP.NET Core Web API project
+?? Name: ECommerceAPI
+?? Target Framework: .NET 8.0
+? Authentication: None
+? Enable Use Controllers
+
+? Goal: Clean Web API base project ready for configuration.
+
+?? Mission 2 – Install Required NuGet Packages
+
+?? Open Tools ? NuGet Package Manager ? Package Manager Console
+?? Run the following:
+
+Install-Package Microsoft.EntityFrameworkCore -Version 8.0.0
+Install-Package Microsoft.EntityFrameworkCore.SqlServer -Version 8.0.0
+Install-Package Microsoft.EntityFrameworkCore.Tools -Version 8.0.0
+Install-Package Microsoft.EntityFrameworkCore.Design -Version 8.0.0
+
+
+? Goal: EF Core fully integrated with SQL Server provider and migration tools.
+
+?? Mission 3 – Create Project Folders
+
+?? Add folders under the root project:
+
+?? Models
+?? Data
+?? DTOs
+?? Controllers
+
+
+? Goal: Clean, scalable architecture for future features.
+
+?? Mission 4 – Prepare Database Connection
+
+? Open appsettings.json
+? Add the connection string placeholder:
+
+"ConnectionStrings": {
+  "DefaultConnection": "Server=.;Database=ECommerceDb;Trusted_Connection=True;TrustServerCertificate=True;"
+}
+
+
+? Goal: Ready for EF Core context and DB connection.
+
+?? Mission 5 – Run & Verify
+
+? Press Ctrl + F5 to run the project
+? Confirm Swagger UI opens at
+https://localhost:xxxx/swagger
+
+? Goal: Project builds and runs successfully.
+
+?? Phase 1 Status:
+
+? Mission 1  ? Mission 2  ? Mission 3  ? Mission 4  ? Mission 5
+
+
+
+
+
+    //Task AddProductToCart(int userId, int productId, int quantity);
+    //Task UpdateCartItem(int cartItemId, int quantity);
+    //Task DeleteCartItem(int cartItemId);
+    //Task MoveCartToOrder(int userId);

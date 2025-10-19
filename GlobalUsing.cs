@@ -1,0 +1,16 @@
+﻿global using System.ComponentModel.DataAnnotations.Schema;
+global using System.Linq.Expressions;
+global using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+global using Microsoft.EntityFrameworkCore;
+global using Microsoft.AspNetCore.Identity;
+global using Microsoft.AspNetCore.Mvc;
+global using E_Commerce.Service.Interfaces;
+global using E_Commerce.DTOs.CategoryDtos;
+global using E_Commerce.Common;
+global using E_Commerce.Data;
+global using E_Commerce.Models;
+global using E_Commerce.DTOs.ProductDtos;
+global using E_Commerce.Service.CartServerices;
+global using E_Commerce.Repository.Interfaces;
+global using System.ComponentModel.DataAnnotations;
+global using AutoMapper;
