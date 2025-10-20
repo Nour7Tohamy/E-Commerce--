@@ -30,7 +30,15 @@ namespace E_Commerce.Repository.Classes
                 .Include(o => o.OrderItems)
                     .ThenInclude(oi => oi.Product)
                 .Include(o => o.User)
-                .FirstOrDefaultAsync(o => o.Id == orderId);
+                .FirstOrDefaultAsync(o => o.OrderId == orderId);
+        }
+
+        public async Task<Order?> GetOrderForUserByIdAsync(string userId, int orderId)
+        {
+            return await _context.Orders
+                .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.Product)
+                .FirstOrDefaultAsync(o => o.UserId == userId && o.OrderId == orderId);
         }
 
         public async Task<IEnumerable<Order>> GetOrdersByUserIdAsync(string userId)

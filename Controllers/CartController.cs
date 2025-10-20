@@ -25,7 +25,7 @@ namespace E_Commerce.Controllers
         {
             var carts = await _cartService.GetAllCartsAsync();
 
-            if (carts == null || !carts.Any())
+            if (carts == null)
                 return NotFound("No carts found");
 
             return Ok(carts);

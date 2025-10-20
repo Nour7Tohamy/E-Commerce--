@@ -3,7 +3,7 @@
     public class OrderItem
     {
         [Key]
-        public int Id { get; set; }
+        public int OrderItemId { get; set; }
 
         [Required]
         public int ProductId { get; set; }

@@ -1,7 +1,4 @@
-﻿using E_Commerce.DTOs.ProductDtos;
-using E_Commerce.Models;
-using E_Commerce.Repository.Interfaces;
-using E_Commerce.Service.Interfaces;
+﻿using E_Commerce.Common;
 
 namespace E_Commerce.Service.Classes
 {
@@ -91,12 +88,12 @@ namespace E_Commerce.Service.Classes
 
         #region Create Method
 
-        public async Task<OperationResult> AddAsync(CreateProductDto dto)
+        public async Task<OperationResultGeneric<ProductDto>> AddAsync(CreateProductDto dto)
         {
             // Validation
             var categoryExists = await _categoryRepository.ExistsAsync(dto.CategoryId);
             if (!categoryExists)
-                return OperationResult.Fail($"Category with ID {dto.CategoryId} not found.");
+                return OperationResultGeneric<ProductDto>.Fail($"Category with ID {dto.CategoryId} not found.");
 
             // Manual Mapping
             var product = new Product
@@ -109,25 +106,33 @@ namespace E_Commerce.Service.Classes
 
             await _productRepository.AddAsync(product);
             await _productRepository.SaveChangesAsync();
-
-            return OperationResult.Ok($"Product '{dto.ProductName}' created successfully.");
+            var productdto = new ProductDto()
+            {
+                ProductId = product.Id,
+                ProductName = product.Name,
+                Description = product.Description,
+                Price = product.Price,
+                CategoryId = product.CategoryId,
+                CategoryName = product.Category?.Name ?? "Not Exist Category",
+            };
+            return OperationResultGeneric<ProductDto>.Ok(productdto,$"Product '{dto.ProductName}' created successfully.");
         }
 
         #endregion
 
         #region Update Method
 
-        public async Task<OperationResult> UpdateAsync(UpdateProductDto dto)
+        public async Task<OperationResultGeneric<ProductDto>> UpdateAsync(UpdateProductDto dto)
         {
             // Check if product exists
             var product = await _productRepository.GetByIdAsync(dto.ProductId);
             if (product == null)
-                return OperationResult.Fail($"Product with ID {dto.ProductId} not found.");
+                return OperationResultGeneric<ProductDto>.Fail($"Product with ID {dto.ProductId} not found.");
 
             // Check if category exists
             var categoryExists = await _categoryRepository.ExistsAsync(dto.CategoryId);
             if (!categoryExists)
-                return OperationResult.Fail($"Category with ID {dto.CategoryId} not found.");
+                return OperationResultGeneric<ProductDto>.Fail($"Category with ID {dto.CategoryId} not found.");
 
             // Manual Update
             product.Name = dto.ProductName;
@@ -137,8 +142,17 @@ namespace E_Commerce.Service.Classes
 
             _productRepository.Update(product);
             await _productRepository.SaveChangesAsync();
-
-            return OperationResult.Ok($"Product '{dto.ProductName}' updated successfully.");
+            
+            var productdto = new ProductDto()
+            {
+                ProductId = product.Id,
+                ProductName = product.Name,
+                Description = product.Description,
+                Price = product.Price,
+                CategoryId = product.CategoryId,
+                CategoryName = product.Category?.Name ?? "Not Exist Category",
+            };
+            return OperationResultGeneric<ProductDto>.Ok(productdto,$"Product '{dto.ProductName}' updated successfully.");
         }
 
         #endregion
@@ -154,6 +168,15 @@ namespace E_Commerce.Service.Classes
             _productRepository.Delete(product);
             await _productRepository.SaveChangesAsync();
 
+            var productdto =  new ProductDto()
+            {
+                ProductId = product.Id,
+                ProductName = product.Name,
+                Description = product.Description,
+                Price = product.Price,
+                CategoryId = product.CategoryId,
+                CategoryName = product.Category?.Name??"Not Exist Category",
+            };
             return OperationResult.Ok($"Product '{product.Name}' deleted successfully.");
         }
 

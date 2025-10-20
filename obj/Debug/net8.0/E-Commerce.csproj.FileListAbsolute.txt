@@ -6,6 +6,8 @@ C:\Users\gus\source\repos\E-Commerce\E-Commerce\bin\Debug\net8.0\E-Commerce.deps
 C:\Users\gus\source\repos\E-Commerce\E-Commerce\bin\Debug\net8.0\E-Commerce.runtimeconfig.json
 C:\Users\gus\source\repos\E-Commerce\E-Commerce\bin\Debug\net8.0\E-Commerce.dll
 C:\Users\gus\source\repos\E-Commerce\E-Commerce\bin\Debug\net8.0\E-Commerce.pdb
+C:\Users\gus\source\repos\E-Commerce\E-Commerce\bin\Debug\net8.0\AutoMapper.dll
+C:\Users\gus\source\repos\E-Commerce\E-Commerce\bin\Debug\net8.0\AutoMapper.Extensions.Microsoft.DependencyInjection.dll
 C:\Users\gus\source\repos\E-Commerce\E-Commerce\bin\Debug\net8.0\Azure.Core.dll
 C:\Users\gus\source\repos\E-Commerce\E-Commerce\bin\Debug\net8.0\Azure.Identity.dll
 C:\Users\gus\source\repos\E-Commerce\E-Commerce\bin\Debug\net8.0\Humanizer.dll
@@ -123,6 +125,7 @@ C:\Users\gus\source\repos\E-Commerce\E-Commerce\obj\Debug\net8.0\E-Commerce.Asse
 C:\Users\gus\source\repos\E-Commerce\E-Commerce\obj\Debug\net8.0\E-Commerce.csproj.CoreCompileInputs.cache
 C:\Users\gus\source\repos\E-Commerce\E-Commerce\obj\Debug\net8.0\E-Commerce.MvcApplicationPartsAssemblyInfo.cs
 C:\Users\gus\source\repos\E-Commerce\E-Commerce\obj\Debug\net8.0\E-Commerce.MvcApplicationPartsAssemblyInfo.cache
+C:\Users\gus\source\repos\E-Commerce\E-Commerce\obj\Debug\net8.0\E-Commerce.sourcelink.json
 C:\Users\gus\source\repos\E-Commerce\E-Commerce\obj\Debug\net8.0\rjimswa.dswa.cache.json
 C:\Users\gus\source\repos\E-Commerce\E-Commerce\obj\Debug\net8.0\rjsmrazor.dswa.cache.json
 C:\Users\gus\source\repos\E-Commerce\E-Commerce\obj\Debug\net8.0\rjsmcshtml.dswa.cache.json
@@ -138,6 +141,3 @@ C:\Users\gus\source\repos\E-Commerce\E-Commerce\obj\Debug\net8.0\refint\E-Commer
 C:\Users\gus\source\repos\E-Commerce\E-Commerce\obj\Debug\net8.0\E-Commerce.pdb
 C:\Users\gus\source\repos\E-Commerce\E-Commerce\obj\Debug\net8.0\E-Commerce.genruntimeconfig.cache
 C:\Users\gus\source\repos\E-Commerce\E-Commerce\obj\Debug\net8.0\ref\E-Commerce.dll
-C:\Users\gus\source\repos\E-Commerce\E-Commerce\bin\Debug\net8.0\AutoMapper.dll
-C:\Users\gus\source\repos\E-Commerce\E-Commerce\bin\Debug\net8.0\AutoMapper.Extensions.Microsoft.DependencyInjection.dll
-C:\Users\gus\source\repos\E-Commerce\E-Commerce\obj\Debug\net8.0\E-Commerce.sourcelink.json

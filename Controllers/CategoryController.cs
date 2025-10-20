@@ -1,95 +1,97 @@
-﻿[Route("api/[controller]")]
-[ApiController]
-public class CategoryController : ControllerBase
+﻿using E_Commerce.DTOs.CategoryDtos;
+using E_Commerce.Service.Interfaces;
+using Microsoft.AspNetCore.Mvc;
+
+namespace E_Commerce.Controllers
 {
-    private readonly ICategoryService _categoryService;
-
-    public CategoryController(ICategoryService categoryService)
+    [Route("api/[controller]")]
+    [ApiController]
+    public class CategoryController : ControllerBase
     {
-        _categoryService = categoryService;
-    }
+        private readonly ICategoryService _categoryService;
 
-    [HttpGet]
-    public async Task<IActionResult> GetAll()
-    {
-        var categories = await _categoryService.GetAllCategoriesAsync();
-        return Ok(categories);
-    }
-
-    [HttpGet("{id}")]
-    public async Task<IActionResult> GetById(int id)
-    {
-        var category = await _categoryService.GetCategoryByIdAsync(id);
-
-        if (category == null)
-            return NotFound($"Category with ID {id} not found");
-
-        return Ok(category);
-    }
-
-    [HttpPost]
-    public async Task<IActionResult> Add(CreateCategoryDto dto)
-    {
-        if (!ModelState.IsValid)
-            return BadRequest(ModelState);
-
-        try
+        public CategoryController(ICategoryService categoryService)
         {
-            var category = await _categoryService.AddCategoryAsync(dto); 
-            return CreatedAtAction(nameof(GetById), new { id = category.CategoryId }, category);
+            _categoryService = categoryService;
         }
-        catch (Exception ex)
+
+        // GET: api/category
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
         {
-            return BadRequest(ex.Message);
+            var result = await _categoryService.GetAllCategoriesAsync();
+            if (!result.Success)
+                return BadRequest(result.Message);
+
+            return Ok(result.Data);
         }
-    }
 
-    [HttpPost("with-products")]
-    public async Task<IActionResult> AddWithProducts(CreateCategoryWithProductsDto dto)
-    {
-        if (!ModelState.IsValid)
-            return BadRequest(ModelState);
-
-        try
+        // GET: api/category/5
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(int id)
         {
-            var category = await _categoryService.AddCategoryWithProductsAsync(dto); 
-            return CreatedAtAction(nameof(GetById), new { id = category.CategoryId }, category);
+            var result = await _categoryService.GetCategoryByIdAsync(id);
+            if (!result.Success)
+                return NotFound(result.Message);
+
+            return Ok(result.Data);
         }
-        catch (Exception ex)
+
+        // POST: api/category
+        [HttpPost]
+        public async Task<IActionResult> Add(CreateCategoryDto dto)
         {
-            return BadRequest(ex.Message);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var result = await _categoryService.AddCategoryAsync(dto);
+
+            if (!result.Success)
+                return BadRequest(result.Message);
+
+            return CreatedAtAction(nameof(GetById), new { id = result.Data.CategoryId }, result.Data);
         }
-    }
 
-    [HttpPut("{id}")]
-    public async Task<IActionResult> Update(int id, UpdateCategoryWithProductsDto dto)
-    {
-        if (!ModelState.IsValid)
-            return BadRequest(ModelState);
-
-        try
+        // POST: api/category/with-products
+        [HttpPost("with-products")]
+        public async Task<IActionResult> AddWithProducts(CreateCategoryWithProductsDto dto)
         {
-            var category = await _categoryService.UpdateCategoryWithProductsAsync(id, dto); 
-            return Ok(category);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var result = await _categoryService.AddCategoryWithProductsAsync(dto);
+
+            if (!result.Success)
+                return BadRequest(result.Message);
+
+            return CreatedAtAction(nameof(GetById), new { id = result.Data.CategoryId }, result.Data);
         }
-        catch (KeyNotFoundException ex)
+
+        // PUT: api/category/5
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id, UpdateCategoryWithProductsDto dto)
         {
-            return NotFound(ex.Message);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var result = await _categoryService.UpdateCategoryWithProductsAsync(id, dto);
+
+            if (!result.Success)
+                return BadRequest(result.Message);
+
+            return Ok(result.Data);
         }
-        catch (Exception ex)
+
+        // DELETE: api/category/5
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
         {
-            return BadRequest(ex.Message);
+            var result = await _categoryService.DeleteCategoryAsync(id);
+
+            if (!result.Success)
+                return NotFound(result.Message);
+
+            return Ok(result.Message);
         }
-    }
-
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete(int id)
-    {
-        var result = await _categoryService.DeleteCategoryAsync(id); 
-
-        if (!result.Success)
-            return NotFound(result.Message);
-
-        return Ok(result.Message);
     }
 }

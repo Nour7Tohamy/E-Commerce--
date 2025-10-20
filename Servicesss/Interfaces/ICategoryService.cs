@@ -1,25 +1,27 @@
 ﻿using E_Commerce.DTOs.CategoryDtos;
+using E_Commerce.DTOs.ProductDtos;
+using E_Commerce.Models;
 
 namespace E_Commerce.Service.Interfaces
 {
     public interface ICategoryService
     {
         // Get Methods
-        Task<IEnumerable<CategoryDto>> GetAllCategoriesAsync();
-        Task<CategoryDto?> GetCategoryByIdAsync(int id);
-        Task<IEnumerable<CategoryWithProductsDto>> GetCategoriesWithProductsAsync();
-        Task<IEnumerable<CategoryWithCountDto>> GetCategoriesWithProductCountAsync();
-        Task<IEnumerable<CategorySalesDto>> GetPopularCategoriesAsync();
-        Task<IEnumerable<CategoryDto>> SearchCategoryAsync(string name);
+        Task<OperationResultGeneric<IEnumerable<CategoryDto>>> GetAllCategoriesAsync();
+        Task<OperationResultGeneric<CategoryDto>> GetCategoryByIdAsync(int id);
+        Task<OperationResultGeneric<IEnumerable<CategoryWithProductsDto>>> GetCategoriesWithProductsAsync();
+        Task<OperationResultGeneric<IEnumerable<CategoryWithCountDto>>> GetCategoriesWithProductCountAsync();
+        Task<OperationResultGeneric<IEnumerable<CategorySalesDto>>> GetPopularCategoriesAsync();
+        Task<OperationResultGeneric<IEnumerable<CategoryDto>>> SearchCategoryAsync(string name);
 
         // Create Methods
-        Task<CategoryDto> AddCategoryAsync(CreateCategoryDto dto);
-        Task<CategoryWithProductsDto> AddCategoryWithProductsAsync(CreateCategoryWithProductsDto dto);
+        Task<OperationResultGeneric<CategoryDto>> AddCategoryAsync(CreateCategoryDto dto);
+        Task<OperationResultGeneric<CategoryWithProductsDto>> AddCategoryWithProductsAsync(CreateCategoryWithProductsDto dto);
 
         // Update Methods
-        Task<CategoryWithProductsDto> UpdateCategoryWithProductsAsync(int id, UpdateCategoryWithProductsDto dto); 
+        Task<OperationResultGeneric<CategoryWithProductsDto>> UpdateCategoryWithProductsAsync(int id, UpdateCategoryWithProductsDto dto);
 
         // Delete Methods
-        Task<OperationResult> DeleteCategoryAsync(int id); 
+        Task<OperationResult> DeleteCategoryAsync(int id);
     }
 }

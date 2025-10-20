@@ -1,11 +1,9 @@
-﻿using E_Commerce.Models.Enums;
-
-namespace E_Commerce.Models
+﻿namespace E_Commerce.Models
 {
     public class Order
     {
         [Key]
-        public int Id { get; set; }
+        public int OrderId { get; set; }
 
         [ForeignKey(nameof(User))]
         public string UserId { get; set; }
@@ -15,7 +13,7 @@ namespace E_Commerce.Models
         public DateTime OrderDate { get; set; } = DateTime.UtcNow;
 
         [Required]
-        public OrderStatus Status { get; set; } = OrderStatus.Pending; 
+        public OrderStatus Status { get; set; } = OrderStatus.Pending;
 
         [Required]
         public string PaymentMethod { get; set; } // طريقه الدفع
@@ -34,6 +32,8 @@ namespace E_Commerce.Models
 
         [Column(TypeName = "decimal(18,2)")]
         public decimal TotalPrice { get; set; }
+        [Required]
+        public string CustomerName { get; set; }
 
         public string? DeliveryAddress { get; set; } // مكان الاستلام
 

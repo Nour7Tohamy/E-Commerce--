@@ -15,5 +15,10 @@
 
         // إجمالي السعر (Quantity × Price)
         public decimal Total => Quantity * Price;
+
+        [Range(0, double.MaxValue)]
+        [Display(Name = "Unit Price")]
+        [DataType(DataType.Currency)]
+        public decimal UnitPrice { get; set; }
     }
 }

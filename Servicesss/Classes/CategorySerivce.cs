@@ -17,36 +17,38 @@ namespace E_Commerce.Service.Classes
 
         #region Get Methods
 
-        public async Task<IEnumerable<CategoryDto>> GetAllCategoriesAsync()
+        public async Task<OperationResultGeneric<IEnumerable<CategoryDto>>> GetAllCategoriesAsync()
         {
             var categories = await _categoryRepository.GetAllAsync();
 
-            return categories.Select(c => new CategoryDto
+            var result = categories.Select(c => new CategoryDto
             {
                 CategoryId = c.Id,
                 CategoryName = c.Name
             }).ToList();
+
+            return OperationResultGeneric<IEnumerable<CategoryDto>>.Ok(result, "Categories retrieved successfully.");
         }
 
-        public async Task<CategoryDto?> GetCategoryByIdAsync(int id)
+        public async Task<OperationResultGeneric<CategoryDto>> GetCategoryByIdAsync(int id)
         {
             var category = await _categoryRepository.GetByIdAsync(id);
-
             if (category == null)
-                return null;
+                return OperationResultGeneric<CategoryDto>.Fail($"Category with ID {id} not found.");
 
-            return new CategoryDto
+            var dto = new CategoryDto
             {
                 CategoryId = category.Id,
                 CategoryName = category.Name
             };
+            return OperationResultGeneric<CategoryDto>.Ok(dto, "Category retrieved successfully.");
         }
 
-        public async Task<IEnumerable<CategoryWithProductsDto>> GetCategoriesWithProductsAsync()
+        public async Task<OperationResultGeneric<IEnumerable<CategoryWithProductsDto>>> GetCategoriesWithProductsAsync()
         {
             var categories = await _categoryRepository.GetCategoriesWithProductsAsync();
 
-            return categories.Select(c => new CategoryWithProductsDto
+            var result = categories.Select(c => new CategoryWithProductsDto
             {
                 CategoryId = c.CategoryId,
                 CategoryName = c.CategoryName,
@@ -60,25 +62,29 @@ namespace E_Commerce.Service.Classes
                     CategoryName = c.CategoryName
                 }).ToList() ?? new List<ProductDto>()
             }).ToList();
+
+            return OperationResultGeneric<IEnumerable<CategoryWithProductsDto>>.Ok(result, "Categories with products retrieved successfully.");
         }
 
-        public async Task<IEnumerable<CategoryWithCountDto>> GetCategoriesWithProductCountAsync()
+        public async Task<OperationResultGeneric<IEnumerable<CategoryWithCountDto>>> GetCategoriesWithProductCountAsync()
         {
             var categories = await _categoryRepository.GetCategoriesWithProductsAsync();
 
-            return categories.Select(c => new CategoryWithCountDto
+            var result = categories.Select(c => new CategoryWithCountDto
             {
                 CategoryId = c.CategoryId,
                 CategoryName = c.CategoryName,
                 ProductCount = c.Products?.Count ?? 0
             }).ToList();
+
+            return OperationResultGeneric<IEnumerable<CategoryWithCountDto>>.Ok(result, "Categories with product count retrieved successfully.");
         }
 
-        public async Task<IEnumerable<CategorySalesDto>> GetPopularCategoriesAsync()
+        public async Task<OperationResultGeneric<IEnumerable<CategorySalesDto>>> GetPopularCategoriesAsync()
         {
             var categories = await _categoryRepository.GetCategoriesWithProductsAsync();
 
-            return categories
+            var result = categories
                 .Select(c => new CategorySalesDto
                 {
                     CategoryId = c.CategoryId,
@@ -88,25 +94,28 @@ namespace E_Commerce.Service.Classes
                 .OrderByDescending(x => x.TotalSales)
                 .Take(5)
                 .ToList();
+
+            return OperationResultGeneric<IEnumerable<CategorySalesDto>>.Ok(result, "Top categories retrieved successfully.");
         }
 
-        public async Task<IEnumerable<CategoryDto>> SearchCategoryAsync(string name)
+        public async Task<OperationResultGeneric<IEnumerable<CategoryDto>>> SearchCategoryAsync(string name)
         {
             var categories = await _categoryRepository.SearchCategoryAsync(name);
 
-            return categories.Select(c => new CategoryDto
+            var result = categories.Select(c => new CategoryDto
             {
                 CategoryId = c.CategoryId,
                 CategoryName = c.CategoryName
             }).ToList();
+
+            return OperationResultGeneric<IEnumerable<CategoryDto>>.Ok(result, "Search completed successfully.");
         }
 
         #endregion
 
         #region Create Methods
 
-        // ✅ شلنا OperationResult - بنرجع CategoryDto مباشرة
-        public async Task<CategoryDto> AddCategoryAsync(CreateCategoryDto dto)
+        public async Task<OperationResultGeneric<CategoryDto>> AddCategoryAsync(CreateCategoryDto dto)
         {
             var category = new Category
             {
@@ -116,15 +125,16 @@ namespace E_Commerce.Service.Classes
             await _categoryRepository.AddAsync(category);
             await _categoryRepository.SaveChangesAsync();
 
-            return new CategoryDto
+            var dtoResult = new CategoryDto
             {
                 CategoryId = category.Id,
                 CategoryName = category.Name
             };
+
+            return OperationResultGeneric<CategoryDto>.Ok(dtoResult, $"Category '{dto.CategoryName}' created successfully.");
         }
 
-        // ✅ شلنا OperationResult - بنرجع CategoryWithProductsDto مباشرة
-        public async Task<CategoryWithProductsDto> AddCategoryWithProductsAsync(CreateCategoryWithProductsDto dto)
+        public async Task<OperationResultGeneric<CategoryWithProductsDto>> AddCategoryWithProductsAsync(CreateCategoryWithProductsDto dto)
         {
             var category = new Category
             {
@@ -140,7 +150,7 @@ namespace E_Commerce.Service.Classes
             await _categoryRepository.AddAsync(category);
             await _categoryRepository.SaveChangesAsync();
 
-            return new CategoryWithProductsDto
+            var dtoResult = new CategoryWithProductsDto
             {
                 CategoryId = category.Id,
                 CategoryName = category.Name,
@@ -154,42 +164,38 @@ namespace E_Commerce.Service.Classes
                     CategoryName = category.Name
                 }).ToList()
             };
+
+            return OperationResultGeneric<CategoryWithProductsDto>.Ok(dtoResult, $"Category '{dto.CategoryName}' created successfully.");
         }
 
         #endregion
 
         #region Update Methods
 
-        // ✅ شلنا OperationResult - بنرجع CategoryWithProductsDto مباشرة أو Exception
-        public async Task<CategoryWithProductsDto> UpdateCategoryWithProductsAsync(int id, UpdateCategoryWithProductsDto dto)
+        public async Task<OperationResultGeneric<CategoryWithProductsDto>> UpdateCategoryWithProductsAsync(int id, UpdateCategoryWithProductsDto dto)
         {
             var category = await _categoryRepository.GetCategoryWithProductsByIdAsync(id);
 
             if (category == null)
-                throw new KeyNotFoundException($"Category with ID {id} not found.");
+                return OperationResultGeneric<CategoryWithProductsDto>.Fail($"Category with ID {id} not found.");
 
             category.Name = dto.CategoryName;
 
-            if (dto.Products != null)
+            if (dto.Products != null && dto.Products.Any())
             {
-                category.Products.Clear();
-                foreach (var productDto in dto.Products)
+                category.Products = dto.Products.Select(p => new Product
                 {
-                    var product = new Product
-                    {
-                        Name = productDto.ProductName,
-                        Description = productDto.Description,
-                        Price = productDto.Price,
-                        CategoryId = category.Id
-                    };
-                    category.Products.Add(product);
-                }
+                    Name = p.ProductName,
+                    Description = p.Description,
+                    Price = p.Price,
+                    CategoryId = category.Id
+                }).ToList();
             }
 
             _categoryRepository.Update(category);
             await _categoryRepository.SaveChangesAsync();
 
-            return new CategoryWithProductsDto
+            var dtoResult = new CategoryWithProductsDto
             {
                 CategoryId = category.Id,
                 CategoryName = category.Name,
@@ -203,13 +209,14 @@ namespace E_Commerce.Service.Classes
                     CategoryName = category.Name
                 }).ToList()
             };
+
+            return OperationResultGeneric<CategoryWithProductsDto>.Ok(dtoResult, $"Category '{dto.CategoryName}' updated successfully.");
         }
 
         #endregion
 
         #region Delete Methods
 
-        // ✅ ده سيبناه OperationResult
         public async Task<OperationResult> DeleteCategoryAsync(int id)
         {
             var category = await _categoryRepository.GetByIdAsync(id);

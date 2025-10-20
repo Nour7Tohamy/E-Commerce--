@@ -22,64 +22,68 @@ namespace E_Commerce.Service.Classes
 
         #region Get Methods
 
-        public async Task<IEnumerable<Cart>> GetAllCartsAsync()
+        public async Task<OperationResultGeneric<IEnumerable<Cart>>> GetAllCartsAsync()
         {
-            return await _cartRepository.GetAllCartsAsync();
+            var carts = await _cartRepository.GetAllCartsAsync();
+            return OperationResultGeneric<IEnumerable<Cart>>.Ok(carts, "All carts retrieved successfully");
         }
 
-        public async Task<Cart?> GetCartByIdAsync(int cartId)
+        public async Task<OperationResultGeneric<Cart>> GetCartByIdAsync(int cartId)
         {
-            return await _cartRepository.GetCartByIdAsync(cartId);
+            var cart = await _cartRepository.GetCartByIdAsync(cartId);
+            if (cart == null)
+                return OperationResultGeneric<Cart>.Fail("Cart not found");
+
+            return OperationResultGeneric<Cart>.Ok(cart);
         }
 
-        public async Task<Cart?> GetCartByUserIdAsync(string userId)
+        public async Task<OperationResultGeneric<Cart>> GetCartByUserIdAsync(string userId)
         {
-            return await _cartRepository.GetCartByUserIdAsync(userId);
+            var cart = await _cartRepository.GetCartByUserIdAsync(userId);
+            if (cart == null)
+                return OperationResultGeneric<Cart>.Fail("Cart not found for this user");
+
+            return OperationResultGeneric<Cart>.Ok(cart);
         }
 
-        public async Task<int> GetCartItemCountAsync(string userId)
+        public async Task<OperationResultGeneric<int>> GetCartItemCountAsync(string userId)
         {
-            return await _cartRepository.GetCartItemCountAsync(userId);
+            var count = await _cartRepository.GetCartItemCountAsync(userId);
+            return OperationResultGeneric<int>.Ok(count);
         }
 
-        public async Task<CartTotalSaleDto> GetCartTotalAsync(string userId)
+        public async Task<OperationResultGeneric<CartTotalSaleDto>> GetCartTotalAsync(string userId)
         {
             var cart = await _cartRepository.GetCartByUserIdAsync(userId);
 
             if (cart == null || !cart.CartItems.Any())
-            {
-                return new CartTotalSaleDto
-                {
-                    UserId = userId,
-                    TotalSales = 0
-                };
-            }
+                return OperationResultGeneric<CartTotalSaleDto>.Fail("Cart is empty");
 
             var total = cart.CartItems.Sum(ci => ci.Quantity * ci.Product.Price);
 
-            // Manual Mapping
-            return new CartTotalSaleDto
+            var dto = new CartTotalSaleDto
             {
                 CartId = cart.Id,
                 UserId = userId,
                 TotalSales = total
             };
+
+            return OperationResultGeneric<CartTotalSaleDto>.Ok(dto);
         }
 
-        public async Task<CartDto?> CheckIfProductExistsInCartAsync(ProductExistsInCartDto dto)
+        public async Task<OperationResultGeneric<CartDto>> CheckIfProductExistsInCartAsync(ProductExistsInCartDto dto)
         {
             var cart = await _cartRepository.GetCartByUserIdAsync(dto.UserId);
 
             if (cart == null || !cart.CartItems.Any())
-                return null;
+                return OperationResultGeneric<CartDto>.Fail("Cart not found or empty");
 
             var cartItem = cart.CartItems.FirstOrDefault(ci => ci.ProductId == dto.ProductId);
 
             if (cartItem == null)
-                return null;
+                return OperationResultGeneric<CartDto>.Fail("Product not found in cart");
 
-            // Manual Mapping
-            return new CartDto
+            var result = new CartDto
             {
                 CartId = cart.Id,
                 UserId = dto.UserId,
@@ -88,37 +92,32 @@ namespace E_Commerce.Service.Classes
                 Quantity = cartItem.Quantity,
                 TotalPrice = (cartItem.Product?.Price ?? 0m) * cartItem.Quantity
             };
+
+            return OperationResultGeneric<CartDto>.Ok(result, "Product exists in cart");
         }
 
         #endregion
 
         #region Business Logic Methods
 
-        public async Task<CartDiscountDto?> ApplyCouponAsync(ApplyCouponRequestDto dto)
+        public async Task<OperationResultGeneric<CartDiscountDto>> ApplyCouponAsync(ApplyCouponRequestDto dto)
         {
-            // Get cart
             var cart = await _cartRepository.GetCartByUserIdAsync(dto.UserId);
-
             if (cart == null || !cart.CartItems.Any())
-                return null;
+                return OperationResultGeneric<CartDiscountDto>.Fail("Cart not found or empty");
 
-            // Get coupon
             var coupon = await _couponRepository.GetValidCouponByCodeAsync(dto.CouponCode);
-
             if (coupon == null)
-                return null;
+                return OperationResultGeneric<CartDiscountDto>.Fail("Invalid or expired coupon");
 
-            // Apply coupon to cart
             cart.CouponId = coupon.Id;
             _cartRepository.Update(cart);
             await _cartRepository.SaveChangesAsync();
 
-            // Calculate totals
             var total = cart.CartItems.Sum(ci => ci.Product.Price * ci.Quantity);
             var discountedTotal = total * (1 - coupon.Percentage / 100m);
 
-            // Manual Mapping
-            return new CartDiscountDto
+            var result = new CartDiscountDto
             {
                 cartId = cart.Id,
                 userId = cart.UserId,
@@ -126,19 +125,17 @@ namespace E_Commerce.Service.Classes
                 DiscountPercentage = coupon.Percentage,
                 TotalAfterDiscount = discountedTotal
             };
+
+            return OperationResultGeneric<CartDiscountDto>.Ok(result, "Coupon applied successfully");
         }
 
         public async Task<OperationResult> ClearCartAsync(string userId)
         {
             var cart = await _cartRepository.GetCartByUserIdAsync(userId);
-
             if (cart == null)
                 return OperationResult.Fail("Cart not found");
 
-            // Delete cart items first
             await _cartRepository.DeleteCartItemsAsync(cart.Id);
-
-            // Delete cart
             _cartRepository.Delete(cart);
             await _cartRepository.SaveChangesAsync();
 
@@ -148,16 +145,12 @@ namespace E_Commerce.Service.Classes
         public async Task<OperationResult> ValidateCartBeforeCheckoutAsync(CheckoutCartDto dto)
         {
             var cart = await _cartRepository.GetCartByUserIdAsync(dto.UserId);
-
-            // Validate cart exists and has items
             if (cart == null || !cart.CartItems.Any())
                 return OperationResult.Fail("Cart or CartItems is empty");
 
-            // Validate stock availability
             if (cart.CartItems.Any(ci => ci.Quantity > ci.Product.Stock))
                 return OperationResult.Fail("Some products are out of stock");
 
-            // Validate coupon if provided
             if (!string.IsNullOrEmpty(dto.CouponCode))
             {
                 if (cart.Coupon == null ||
@@ -169,7 +162,6 @@ namespace E_Commerce.Service.Classes
                 }
             }
 
-            // Validate expected total if provided
             if (dto.ExpectedTotal.HasValue)
             {
                 var total = cart.CartItems.Sum(ci => ci.Product.Price * ci.Quantity);

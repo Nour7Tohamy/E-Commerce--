@@ -8,6 +8,7 @@ namespace E_Commerce.Repository.Interfaces
         Task<IEnumerable<Order>> GetAllOrdersAsync();
         Task<Order?> GetOrderByIdAsync(int orderId);
         Task<IEnumerable<Order>> GetOrdersByUserIdAsync(string userId);
+        Task<Order?> GetOrderForUserByIdAsync(string userId , int orderId);
         Task SaveChangesAsync();
     }
 }

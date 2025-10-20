@@ -3,13 +3,14 @@
     //user
     public class UpdateOrderDto
     {
-        public string? DeliveryAddress { get; set; }
+        public int OrderId { get; set; }
+        public string UserId { get; set; }
         public string? PaymentMethod { get; set; }
-        public string? OrderType { get; set; } // مثلاً: Delivery أو Pickup
-
-        // المستخدم ممكن يغيّر أو يمسح Items قبل التأكيد
+        public string? OrderType { get; set; }
+        public string? DeliveryAddress { get; set; }
+        public string? CustomerName { get; set; }
         public List<UpdateOrderItemDto>? Items { get; set; } = new();
     }
 
-  
+
 }
