@@ -1,6 +1,8 @@
-﻿using E_Commerce.DTOs.CategoryDtos;
+﻿using E_Commerce.Data;
+using E_Commerce.DTOs.CategoryDtos;
 using E_Commerce.DTOs.ProductDtos;
 using E_Commerce.Models;
+using E_Commerce.Repository._Generics;
 using E_Commerce.Repository.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,7 +17,7 @@ namespace E_Commerce.Repository.Classes
             _context = context;
         }
 
-        public async Task<IEnumerable<CategoryWithProductsDto>> GetCategoriesWithProductsAsync()
+        public virtual async Task<IEnumerable<CategoryWithProductsDto>> GetCategoriesWithProductsAsync()
         {
             return await _context.Categories
                 .Include(c => c.Products)
@@ -27,13 +29,16 @@ namespace E_Commerce.Repository.Classes
                     {
                         ProductId = p.Id,
                         ProductName = p.Name,
-                        Price = p.Price
+                        Description = p.Description,
+                        Price = p.Price,
+                        CategoryId = c.Id,
+                        CategoryName = c.Name
                     }).ToList()
                 })
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<CategoryWithCountDto>> GetCategoriesWithProductCountAsync()
+        public virtual async Task<IEnumerable<CategoryWithCountDto>> GetCategoriesWithProductCountAsync()
         {
             return await _context.Categories
                 .Select(c => new CategoryWithCountDto
@@ -41,17 +46,18 @@ namespace E_Commerce.Repository.Classes
                     CategoryId = c.Id,
                     CategoryName = c.Name,
                     ProductCount = c.Products.Count()
-                }).ToListAsync();
+                })
+                .ToListAsync();
         }
 
-        public async Task<Category> GetCategoryWithProductsByIdAsync(int id)
+        public virtual async Task<Category> GetCategoryWithProductsByIdAsync(int id)
         {
             return await _context.Categories
                 .Include(c => c.Products)
                 .FirstOrDefaultAsync(c => c.Id == id);
         }
 
-        public async Task<IEnumerable<CategorySalesDto>> GetPopularCategoriesAsync()
+        public virtual async Task<IEnumerable<CategorySalesDto>> GetPopularCategoriesAsync()
         {
             return await _context.CartItems
                 .GroupBy(ci => new { ci.Product.Category.Id, ci.Product.Category.Name })
@@ -65,7 +71,7 @@ namespace E_Commerce.Repository.Classes
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<CategoryDto>> SearchCategoryAsync(string name)
+        public virtual async Task<IEnumerable<CategoryDto>> SearchCategoryAsync(string name)
         {
             return await _context.Categories
                 .Where(c => c.Name.Contains(name))
@@ -75,6 +81,11 @@ namespace E_Commerce.Repository.Classes
                     CategoryName = c.Name
                 })
                 .ToListAsync();
+        }
+
+        Task ICategoryRepository.SaveChangesAsync()
+        {
+            return SaveChangesAsync();
         }
     }
 }

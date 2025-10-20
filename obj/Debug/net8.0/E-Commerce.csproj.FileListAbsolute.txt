@@ -140,3 +140,4 @@ C:\Users\gus\source\repos\E-Commerce\E-Commerce\obj\Debug\net8.0\E-Commerce.genr
 C:\Users\gus\source\repos\E-Commerce\E-Commerce\obj\Debug\net8.0\ref\E-Commerce.dll
 C:\Users\gus\source\repos\E-Commerce\E-Commerce\bin\Debug\net8.0\AutoMapper.dll
 C:\Users\gus\source\repos\E-Commerce\E-Commerce\bin\Debug\net8.0\AutoMapper.Extensions.Microsoft.DependencyInjection.dll
+C:\Users\gus\source\repos\E-Commerce\E-Commerce\obj\Debug\net8.0\E-Commerce.sourcelink.json

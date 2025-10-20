@@ -1,11 +1,9 @@
-﻿using E_Commerce.Data;
+﻿using E_Commerce.Common;
 using E_Commerce.DTOs.CartDtos;
 using E_Commerce.DTOs.CartItemDtos;
 using E_Commerce.Models;
+using E_Commerce.Service.CartServ;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using AutoMapper;
-using E_Commerce.Repository.Interfaces;
 
 namespace E_Commerce.Controllers
 {
@@ -13,15 +11,11 @@ namespace E_Commerce.Controllers
     [ApiController]
     public class CartController : ControllerBase
     {
-        private readonly ICartRepository _cartRepository;
-        private readonly EcommerceDbContext _context;
-        private readonly IMapper _mapper;
+        private readonly ICartService _cartService;
 
-        public CartController(ICartRepository cartRepository, EcommerceDbContext context, IMapper mapper)
+        public CartController(ICartService cartService)
         {
-            _cartRepository = cartRepository;
-            _context = context;
-            _mapper = mapper;
+            _cartService = cartService;
         }
 
         #region GET Endpoints
@@ -29,7 +23,7 @@ namespace E_Commerce.Controllers
         [HttpGet("GetAllCarts")]
         public async Task<ActionResult<IEnumerable<Cart>>> GetAllCarts()
         {
-            var carts = await _cartRepository.GetAllCartsAsync();
+            var carts = await _cartService.GetAllCartsAsync();
 
             if (carts == null || !carts.Any())
                 return NotFound("No carts found");
@@ -40,7 +34,7 @@ namespace E_Commerce.Controllers
         [HttpGet("GetCartById/{cartId}")]
         public async Task<ActionResult<Cart>> GetCartById(int cartId)
         {
-            var cart = await _cartRepository.GetCartByIdAsync(cartId);
+            var cart = await _cartService.GetCartByIdAsync(cartId);
 
             if (cart == null)
                 return NotFound($"Cart with ID {cartId} not found");
@@ -51,7 +45,7 @@ namespace E_Commerce.Controllers
         [HttpGet("GetCartByUserId/{userId}")]
         public async Task<ActionResult<Cart>> GetCartByUserId(string userId)
         {
-            var cart = await _cartRepository.GetCartByUserIdAsync(userId);
+            var cart = await _cartService.GetCartByUserIdAsync(userId);
 
             if (cart == null)
                 return NotFound($"Cart for user {userId} not found");
@@ -62,21 +56,15 @@ namespace E_Commerce.Controllers
         [HttpGet("GetCartItemCount/{userId}")]
         public async Task<ActionResult<int>> GetCartItemCount(string userId)
         {
-            var count = await _cartRepository.GetCartItemCountAsync(userId);
+            var count = await _cartService.GetCartItemCountAsync(userId);
             return Ok(count);
         }
 
         [HttpGet("GetCartTotal/{userId}")]
         public async Task<ActionResult<CartTotalSaleDto>> GetCartTotal(string userId)
         {
-            var cart = await _cartRepository.GetCartByUserIdAsync(userId);
-
-            if (cart == null || !cart.CartItems.Any())
-                return Ok(new CartTotalSaleDto { UserId = userId, TotalSales = 0 });
-
-            var cartTotalDto = _mapper.Map<CartTotalSaleDto>(cart);
-
-            return Ok(cartTotalDto);
+            var cartTotal = await _cartService.GetCartTotalAsync(userId);
+            return Ok(cartTotal);
         }
 
         [HttpPost("CheckProductExists")]
@@ -85,21 +73,10 @@ namespace E_Commerce.Controllers
             if (string.IsNullOrWhiteSpace(dto.UserId))
                 return BadRequest("UserId is required");
 
-            var cart = await _cartRepository.GetCartByUserIdAsync(dto.UserId);
+            var cartDto = await _cartService.CheckIfProductExistsInCartAsync(dto);
 
-            if (cart == null || !cart.CartItems.Any())
-                return NotFound("Cart is empty or not found");
-
-            var cartItem = cart.CartItems.FirstOrDefault(ci => ci.ProductId == dto.ProductId);
-
-            if (cartItem == null)
+            if (cartDto == null)
                 return NotFound("Product not found in cart");
-
-            var cartDto = _mapper.Map<CartDto>(cart);
-            cartDto.ProductId = dto.ProductId;
-            cartDto.ProductDescription = cartItem.Product?.Description ?? "No description";
-            cartDto.Quantity = cartItem.Quantity;
-            cartDto.TotalPrice = (cartItem.Product?.Price ?? 0m) * cartItem.Quantity;
 
             return Ok(cartDto);
         }
@@ -117,33 +94,12 @@ namespace E_Commerce.Controllers
             if (string.IsNullOrWhiteSpace(dto.CouponCode))
                 return BadRequest("CouponCode is required");
 
-            var cart = await _cartRepository.GetCartByUserIdAsync(dto.UserId);
+            var result = await _cartService.ApplyCouponAsync(dto);
 
-            if (cart == null || !cart.CartItems.Any())
-                return NotFound("Cart is empty or not found");
+            if (result == null)
+                return NotFound("Cart is empty or coupon is invalid");
 
-            var coupon = await _context.Coupons
-                .FirstOrDefaultAsync(c =>
-                    c.Code == dto.CouponCode &&
-                    c.IsActive &&
-                    c.ExpiryDate > DateTime.UtcNow);
-
-            if (coupon == null)
-                return NotFound("Coupon not valid or expired");
-
-            cart.CouponId = coupon.Id;
-            _context.Carts.Update(cart);
-            await _context.SaveChangesAsync();
-
-            var total = cart.CartItems.Sum(ci => ci.Product.Price * ci.Quantity);
-            var discountedTotal = total * (1 - coupon.Percentage / 100m);
-
-            var discountDto = _mapper.Map<CartDiscountDto>(cart);
-            discountDto.couponCode = coupon.Code;
-            discountDto.DiscountPercentage = coupon.Percentage;
-            discountDto.TotalAfterDiscount = discountedTotal;
-
-            return Ok(discountDto);
+            return Ok(result);
         }
 
         [HttpDelete("ClearCart/{userId}")]
@@ -152,16 +108,12 @@ namespace E_Commerce.Controllers
             if (string.IsNullOrWhiteSpace(userId))
                 return BadRequest("UserId is required");
 
-            var cart = await _cartRepository.GetCartByUserIdAsync(userId);
+            var result = await _cartService.ClearCartAsync(userId);
 
-            if (cart == null)
-                return NotFound($"Cart for user {userId} not found");
+            if (!result.Success)
+                return NotFound(result.Message);
 
-            _context.CartItems.RemoveRange(cart.CartItems);
-            _context.Carts.Remove(cart);
-            await _context.SaveChangesAsync();
-
-            return Ok(new { Message = $"Cart for user {userId} cleared successfully" });
+            return Ok(new { Message = result.Message });
         }
 
         [HttpPost("ValidateCart")]
@@ -170,33 +122,12 @@ namespace E_Commerce.Controllers
             if (string.IsNullOrWhiteSpace(dto.UserId))
                 return BadRequest("UserId is required");
 
-            var cart = await _cartRepository.GetCartByUserIdAsync(dto.UserId);
+            var result = await _cartService.ValidateCartBeforeCheckoutAsync(dto);
 
-            if (cart == null || !cart.CartItems.Any())
-                return BadRequest("Cart is empty");
+            if (!result.Success)
+                return BadRequest(result.Message);
 
-            if (cart.CartItems.Any(ci => ci.Quantity > ci.Product.Stock))
-                return BadRequest("Some products are out of stock");
-
-            if (!string.IsNullOrEmpty(dto.CouponCode))
-            {
-                if (cart.Coupon == null ||
-                    cart.Coupon.Code != dto.CouponCode ||
-                    !cart.Coupon.IsActive ||
-                    cart.Coupon.ExpiryDate <= DateTime.UtcNow)
-                {
-                    return BadRequest("Coupon is invalid or expired");
-                }
-            }
-
-            if (dto.ExpectedTotal.HasValue)
-            {
-                var total = cart.CartItems.Sum(ci => ci.Product.Price * ci.Quantity);
-                if (total != dto.ExpectedTotal.Value)
-                    return BadRequest("Cart total has changed");
-            }
-
-            return Ok(new { Message = "Cart is valid and ready for checkout" });
+            return Ok(new { Message = result.Message });
         }
 
         #endregion

@@ -1,8 +1,8 @@
-﻿using System.Linq.Expressions;
-using E_Commerce.Repository.Interfaces;
+﻿using E_Commerce.Data;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
-namespace E_Commerce.Repository.Classes
+namespace E_Commerce.Repository._Generics
 {
     public class GenericRepository<T> : IGenericRepository<T> where T : class
     {
@@ -90,6 +90,11 @@ namespace E_Commerce.Repository.Classes
         public virtual async Task<int> CountAsync(Expression<Func<T, bool>> predicate)
         {
             return await _dbSet.CountAsync(predicate);
+        }
+
+        public async Task<int> SaveChangesAsync()
+        {
+            return await _context.SaveChangesAsync();
         }
     }
 }

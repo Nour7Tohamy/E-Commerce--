@@ -1,0 +1,15 @@
+﻿Controller (رفيع وخفيف):
+├── ✅ Request استقبال الـ 
+├── ✅ Service استدعاء الـ 
+└── ✅ Response إرجاع الـ 
+
+Service (القلب النابض):
+├── ✅ Business Logic
+├── ✅ Validation
+├── ✅ Orchestration (تنسيق العمليات)
+├── ✅ Mapping
+└── ✅ Repository استدعاء الـ 
+Separation of Concerns - Reusability - Testability - Maintainability - Single Responsibility
+
+Repository (الوصول للبيانات فقط):
+└── ✅ CRUD Operations

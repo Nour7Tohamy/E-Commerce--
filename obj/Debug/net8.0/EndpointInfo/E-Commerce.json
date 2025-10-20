@@ -1482,7 +1482,9 @@
       "Order": {
         "required": [
           "orderDate",
-          "userId"
+          "orderType",
+          "paymentMethod",
+          "status"
         ],
         "type": "object",
         "properties": {
@@ -1491,8 +1493,8 @@
             "format": "int32"
           },
           "userId": {
-            "minLength": 1,
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "user": {
             "$ref": "#/components/schemas/ApplicationUser"
@@ -1501,9 +1503,36 @@
             "type": "string",
             "format": "date-time"
           },
+          "status": {
+            "$ref": "#/components/schemas/OrderStatus"
+          },
+          "paymentMethod": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "orderType": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "subTotal": {
+            "type": "number",
+            "format": "double"
+          },
+          "tax": {
+            "type": "number",
+            "format": "double"
+          },
+          "deliveryFee": {
+            "type": "number",
+            "format": "double"
+          },
           "totalPrice": {
             "type": "number",
             "format": "double"
+          },
+          "deliveryAddress": {
+            "type": "string",
+            "nullable": true
           },
           "orderItems": {
             "type": "array",
@@ -1553,6 +1582,17 @@
         },
         "additionalProperties": false
       },
+      "OrderStatus": {
+        "enum": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
       "Product": {
         "required": [
           "categoryId",
@@ -1597,6 +1637,9 @@
           "category": {
             "$ref": "#/components/schemas/Category"
           },
+          "status": {
+            "$ref": "#/components/schemas/ProductStatus"
+          },
           "cartItems": {
             "type": "array",
             "items": {
@@ -1629,6 +1672,10 @@
             "type": "string",
             "nullable": true
           },
+          "status": {
+            "type": "string",
+            "nullable": true
+          },
           "price": {
             "type": "number",
             "format": "double"
@@ -1658,6 +1705,16 @@
           }
         },
         "additionalProperties": false
+      },
+      "ProductStatus": {
+        "enum": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "type": "integer",
+        "format": "int32"
       },
       "UpdateCategoryWithProductsDto": {
         "type": "object",

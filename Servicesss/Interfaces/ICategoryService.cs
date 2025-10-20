@@ -6,7 +6,7 @@ namespace E_Commerce.Service.Interfaces
     {
         // Get Methods
         Task<IEnumerable<CategoryDto>> GetAllCategoriesAsync();
-        Task<CategoryDto> GetCategoryByIdAsync(int id);
+        Task<CategoryDto?> GetCategoryByIdAsync(int id);
         Task<IEnumerable<CategoryWithProductsDto>> GetCategoriesWithProductsAsync();
         Task<IEnumerable<CategoryWithCountDto>> GetCategoriesWithProductCountAsync();
         Task<IEnumerable<CategorySalesDto>> GetPopularCategoriesAsync();
@@ -17,9 +17,9 @@ namespace E_Commerce.Service.Interfaces
         Task<CategoryWithProductsDto> AddCategoryWithProductsAsync(CreateCategoryWithProductsDto dto);
 
         // Update Methods
-        Task<CategoryWithProductsDto> UpdateCategoryWithProductsAsync(int id, UpdateCategoryWithProductsDto dto);
+        Task<CategoryWithProductsDto> UpdateCategoryWithProductsAsync(int id, UpdateCategoryWithProductsDto dto); 
 
         // Delete Methods
-        Task DeleteCategoryAsync(int id);
+        Task<OperationResult> DeleteCategoryAsync(int id); 
     }
 }

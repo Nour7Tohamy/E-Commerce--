@@ -1,154 +1,95 @@
-﻿using E_Commerce.DTOs.CategoryDtos;
-using E_Commerce.Service.Interfaces;
-using Microsoft.AspNetCore.Mvc;
-
-namespace E_Commerce.Controllers
+﻿[Route("api/[controller]")]
+[ApiController]
+public class CategoryController : ControllerBase
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class CategoryController : ControllerBase
+    private readonly ICategoryService _categoryService;
+
+    public CategoryController(ICategoryService categoryService)
     {
-        private readonly ICategoryService _service;
+        _categoryService = categoryService;
+    }
 
-        public CategoryController(ICategoryService service)
+    [HttpGet]
+    public async Task<IActionResult> GetAll()
+    {
+        var categories = await _categoryService.GetAllCategoriesAsync();
+        return Ok(categories);
+    }
+
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetById(int id)
+    {
+        var category = await _categoryService.GetCategoryByIdAsync(id);
+
+        if (category == null)
+            return NotFound($"Category with ID {id} not found");
+
+        return Ok(category);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Add(CreateCategoryDto dto)
+    {
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+
+        try
         {
-            _service = service;
+            var category = await _categoryService.AddCategoryAsync(dto); 
+            return CreatedAtAction(nameof(GetById), new { id = category.CategoryId }, category);
         }
-
-        #region GET Endpoints
-
-        [HttpGet("GetAllCategories")]
-        public async Task<ActionResult<IEnumerable<CategoryDto>>> GetAllCategories()
+        catch (Exception ex)
         {
-            var categories = await _service.GetAllCategoriesAsync();
-
-            if (categories == null || !categories.Any())
-                return NotFound("No categories found");
-
-            return Ok(categories);
+            return BadRequest(ex.Message);
         }
+    }
 
-        [HttpGet("GetCategoryById/{id}")]
-        public async Task<ActionResult<CategoryDto>> GetCategoryById(int id)
+    [HttpPost("with-products")]
+    public async Task<IActionResult> AddWithProducts(CreateCategoryWithProductsDto dto)
+    {
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+
+        try
         {
-            var category = await _service.GetCategoryByIdAsync(id);
+            var category = await _categoryService.AddCategoryWithProductsAsync(dto); 
+            return CreatedAtAction(nameof(GetById), new { id = category.CategoryId }, category);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
 
-            if (category == null)
-                return NotFound($"Category with ID {id} not found");
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Update(int id, UpdateCategoryWithProductsDto dto)
+    {
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
 
+        try
+        {
+            var category = await _categoryService.UpdateCategoryWithProductsAsync(id, dto); 
             return Ok(category);
         }
-
-        [HttpGet("GetCategoriesWithProducts")]
-        public async Task<ActionResult<IEnumerable<CategoryWithProductsDto>>> GetCategoriesWithProducts()
+        catch (KeyNotFoundException ex)
         {
-            var categories = await _service.GetCategoriesWithProductsAsync();
-
-            if (categories == null || !categories.Any())
-                return NotFound("No categories with products found");
-
-            return Ok(categories);
+            return NotFound(ex.Message);
         }
-
-        [HttpGet("GetCategoriesWithProductCount")]
-        public async Task<ActionResult<IEnumerable<CategoryWithCountDto>>> GetCategoriesWithProductCount()
+        catch (Exception ex)
         {
-            var categories = await _service.GetCategoriesWithProductCountAsync();
-
-            if (categories == null || !categories.Any())
-                return NotFound("No categories found");
-
-            return Ok(categories);
+            return BadRequest(ex.Message);
         }
+    }
 
-        [HttpGet("GetPopularCategories")]
-        public async Task<ActionResult<IEnumerable<CategorySalesDto>>> GetPopularCategories()
-        {
-            var categories = await _service.GetPopularCategoriesAsync();
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Delete(int id)
+    {
+        var result = await _categoryService.DeleteCategoryAsync(id); 
 
-            if (categories == null || !categories.Any())
-                return NotFound("No popular categories found");
+        if (!result.Success)
+            return NotFound(result.Message);
 
-            return Ok(categories);
-        }
-
-        [HttpGet("SearchCategory")]
-        public async Task<ActionResult<IEnumerable<CategoryDto>>> SearchCategory([FromQuery] string name)
-        {
-            if (string.IsNullOrWhiteSpace(name))
-                return BadRequest("Search name cannot be empty");
-
-            var categories = await _service.SearchCategoryAsync(name);
-
-            if (categories == null || !categories.Any())
-                return NotFound($"No categories found matching '{name}'");
-
-            return Ok(categories);
-        }
-
-        #endregion
-
-        #region POST Endpoints
-
-        [HttpPost("AddCategory")]
-        public async Task<ActionResult<CategoryDto>> AddCategory([FromBody] CreateCategoryDto dto)
-        {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            var category = await _service.AddCategoryAsync(dto);
-
-            return CreatedAtAction(
-                nameof(GetCategoryById),
-                new { id = category.CategoryId },
-                category
-            );
-        }
-
-        [HttpPost("AddCategoryWithProducts")]
-        public async Task<ActionResult<CategoryWithProductsDto>> AddCategoryWithProducts([FromBody] CreateCategoryWithProductsDto dto)
-        {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            var category = await _service.AddCategoryWithProductsAsync(dto);
-
-            return CreatedAtAction(
-                nameof(GetCategoryById),
-                new { id = category.CategoryId },
-                category
-            );
-        }
-
-        #endregion
-
-        #region PUT Endpoints
-
-        [HttpPut("UpdateCategoryWithProducts/{id}")]
-        public async Task<ActionResult<CategoryWithProductsDto>> UpdateCategoryWithProducts(int id, [FromBody] UpdateCategoryWithProductsDto dto)
-        {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            var category = await _service.UpdateCategoryWithProductsAsync(id, dto);
-
-            if (category == null)
-                return NotFound($"Category with ID {id} not found");
-
-            return Ok(category);
-        }
-
-        #endregion
-
-        #region DELETE Endpoints
-
-        [HttpDelete("DeleteCategory/{id}")]
-        public async Task<ActionResult> DeleteCategory(int id)
-        {
-            await _service.DeleteCategoryAsync(id);
-            return Ok(new { Message = $"Category with ID {id} deleted successfully" });
-        }
-
-        #endregion
+        return Ok(result.Message);
     }
 }

@@ -1,8 +1,10 @@
-﻿namespace E_Commerce.Repository.Interfaces
+﻿using E_Commerce.Models;
+using E_Commerce.Repository._Generics;
+
+namespace E_Commerce.Repository.Interfaces
 {
     public interface ICouponRepository : IGenericRepository<Coupon>
     {
-        Task<Coupon?> GetActiveCouponByCodeAsync(string code);
-
+        Task<Coupon?> GetValidCouponByCodeAsync(string code);
     }
 }

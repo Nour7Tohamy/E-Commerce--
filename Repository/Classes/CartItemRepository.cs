@@ -1,4 +1,6 @@
 ﻿
+using E_Commerce.Repository._Generics;
+
 namespace E_Commerce.Repository.Classes
 {
     public class CartItemRepository : GenericRepository<CartItem> , ICartItemRepository
