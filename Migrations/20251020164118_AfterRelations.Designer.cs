@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace E_Commerce.Migrations
 {
     [DbContext(typeof(EcommerceDbContext))]
-    [Migration("20251017092415_333")]
-    partial class _333
+    [Migration("20251020164118_AfterRelations")]
+    partial class AfterRelations
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -196,14 +196,41 @@ namespace E_Commerce.Migrations
 
             modelBuilder.Entity("E_Commerce.Models.Order", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("OrderId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("OrderId"));
+
+                    b.Property<string>("CustomerName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DeliveryAddress")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("DeliveryFee")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime>("OrderDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("OrderType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PaymentMethod")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("SubTotal")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("Tax")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("TotalPrice")
                         .HasColumnType("decimal(18,2)");
@@ -212,7 +239,7 @@ namespace E_Commerce.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
-                    b.HasKey("Id");
+                    b.HasKey("OrderId");
 
                     b.HasIndex("OrderDate");
 
@@ -223,11 +250,11 @@ namespace E_Commerce.Migrations
 
             modelBuilder.Entity("E_Commerce.Models.OrderItem", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("OrderItemId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("OrderItemId"));
 
                     b.Property<int>("OrderId")
                         .HasColumnType("int");
@@ -241,7 +268,7 @@ namespace E_Commerce.Migrations
                     b.Property<decimal>("UnitPrice")
                         .HasColumnType("decimal(18,2)");
 
-                    b.HasKey("Id");
+                    b.HasKey("OrderItemId");
 
                     b.HasIndex("OrderId");
 
@@ -275,6 +302,9 @@ namespace E_Commerce.Migrations
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Status")
                         .HasColumnType("int");
 
                     b.Property<int>("Stock")

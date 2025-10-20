@@ -134,7 +134,6 @@ C:\Users\gus\source\repos\E-Commerce\E-Commerce\obj\Debug\net8.0\staticwebassets
 C:\Users\gus\source\repos\E-Commerce\E-Commerce\obj\Debug\net8.0\staticwebassets.build.json.cache
 C:\Users\gus\source\repos\E-Commerce\E-Commerce\obj\Debug\net8.0\staticwebassets.development.json
 C:\Users\gus\source\repos\E-Commerce\E-Commerce\obj\Debug\net8.0\staticwebassets.build.endpoints.json
-C:\Users\gus\source\repos\E-Commerce\E-Commerce\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt
 C:\Users\gus\source\repos\E-Commerce\E-Commerce\obj\Debug\net8.0\E-Commerce.csproj.Up2Date
 C:\Users\gus\source\repos\E-Commerce\E-Commerce\obj\Debug\net8.0\E-Commerce.dll
 C:\Users\gus\source\repos\E-Commerce\E-Commerce\obj\Debug\net8.0\refint\E-Commerce.dll
